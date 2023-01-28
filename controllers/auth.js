@@ -80,8 +80,6 @@ const revalidateToken = async(request, response = response) => {
 
 
   const token = await generateJWT(uid, name);
-
-  console.log(request.uuid);
   response.json({
     ok: true,
     msg: "revalidate",

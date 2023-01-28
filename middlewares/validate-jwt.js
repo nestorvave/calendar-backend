@@ -24,7 +24,6 @@ const validateJWT = (request, response = response, next) => {
     });
 
   }
-  console.log(token);
   next();
 };
 module.exports = {
