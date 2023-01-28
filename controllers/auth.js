@@ -1,6 +1,7 @@
-const { response } = require("express");
 const Users = require("../models/Users");
 const bcrypt = require("bcryptjs");
+const { generateJWT } = require("../helpers/jwt");
+
 
 const createUser = async (request, response = response) => {
   const { name, email, password } = request.body;
@@ -18,14 +19,15 @@ const createUser = async (request, response = response) => {
     //Encrypt password
     const salt = bcrypt.genSaltSync();
     user.password = bcrypt.hashSync(password, salt);
-// JWT Generated
+    // JWT Generated
+    const token = await generateJWT(user.id, user.name);
     await user.save();
     response.status(201).json({
       ok: true,
       msg: "register",
       name,
       email,
-      password,
+      token,
     });
   } catch (error) {
     response.status(500).json({
@@ -39,7 +41,6 @@ const loginUser = async (request, response = response) => {
   const { email, password } = request.body;
   try {
     const user = await Users.findOne({ email });
-    console.log(user);
     if (user === null) {
       return response.status(400).json({
         ok: false,
@@ -55,12 +56,14 @@ const loginUser = async (request, response = response) => {
     }
 
     // JWT Generated
+    const token = await generateJWT(user.id, user.name);
 
     return response.status(200).json({
       ok: true,
       msg: "Login completed",
       uuid: user.id,
       name: user.name,
+      token,
     });
     //Confirm password
   } catch (error) {
@@ -71,10 +74,18 @@ const loginUser = async (request, response = response) => {
   }
 };
 
-const revalidateToken = (request, response = response) => {
+const revalidateToken = async(request, response = response) => {
+  const uid = request.uid;
+  const name = request.name;
+
+
+  const token = await generateJWT(uid, name);
   response.json({
     ok: true,
     msg: "revalidate",
+    uid,
+    name,
+    token,
   });
 };
 
