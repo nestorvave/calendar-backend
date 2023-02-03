@@ -28,6 +28,7 @@ const createUser = async (request, response = response) => {
       name,
       email,
       token,
+      uuid: user.id,
     });
   } catch (error) {
     response.status(500).json({
